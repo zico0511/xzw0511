@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>經營成本分攤報價工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            display: none;
+        }
+        .result h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 18px;
+            color: #e74c3c;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #3498db;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-col {
+            flex: 1;
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>經營成本分攤報價工具</h1>
+        
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="ticket">機票費用 (TWD):</label>
+                    <input type="number" id="ticket" value="8000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="accommodation">住宿費用 (TWD):</label>
+                    <input type="number" id="accommodation" value="10000">
+                </div>
+            </div>
+            
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="transportation">交通費用 (TWD):</label>
+                    <input type="number" id="transportation" value="2000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="miscellaneous">其他雜支 (TWD):</label>
+                    <input type="number" id="miscellaneous" value="1000">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="purchasePercentage">代購時間佔比 (%):</label>
+                    <input type="number" id="purchasePercentage" value="6" min="0" max="100">
+                </div>
+            </div>
+            
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="itemCount">預計採購件數:</label>
+                    <input type="number" id="itemCount" value="250" min="1">
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="calculate()">計算成本分攤</button>
+        
+        <div class="result" id="result">
+            <h2>成本分攤結果</h2>
+            <div id="costDetails"></div>
+            <div class="total" id="totalCost"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // 獲取輸入值
+            const ticket = parseFloat(document.getElementById('ticket').value) || 0;
+            const accommodation = parseFloat(document.getElementById('accommodation').value) || 0;
+            const transportation = parseFloat(document.getElementById('transportation').value) || 0;
+            const miscellaneous = parseFloat(document.getElementById('miscellaneous').value) || 0;
+            const purchasePercentage = parseFloat(document.getElementById('purchasePercentage').value) || 0;
+            const itemCount = parseFloat(document.getElementById('itemCount').value) || 0;
+            
+            // 驗證輸入
+            if (purchasePercentage < 0 || purchasePercentage > 100) {
+                alert("代購時間佔比必須在0-100%之間");
+                return;
+            }
+            
+            if (itemCount <= 0) {
+                alert("預計採購件數必須大於0");
+                return;
+            }
+            
+            // 計算總成本
+            const totalCost = ticket + accommodation + transportation + miscellaneous;
+            
+            // 計算代購分攤成本
+            const purchaseCost = totalCost * (purchasePercentage / 100);
+            
+            // 計算每件商品分攤金額
+            const costPerItem = purchaseCost / itemCount;
+            
+            // 顯示結果
+            const costDetails = document.getElementById('costDetails');
+            costDetails.innerHTML = `
+                <div class="cost-item"><span>總經營成本:</span><span>${totalCost.toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>代購時間佔比:</span><span>${purchasePercentage}%</span></div>
+                <div class="cost-item"><span>代購分攤總成本:</span><span>${purchaseCost.toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>機票費用分攤:</span><span>${(ticket * (purchasePercentage / 100)).toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>住宿費用分攤:</span><span>${(accommodation * (purchasePercentage / 100)).toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>交通費用分攤:</span><span>${(transportation * (purchasePercentage / 100)).toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>其他雜支分攤:</span><span>${(miscellaneous * (purchasePercentage / 100)).toFixed(2)} TWD</span></div>
+                <div class="cost-item"><span>預計採購件數:</span><span>${itemCount} 件</span></div>
+            `;
+            
+            document.getElementById('totalCost').innerHTML = `每件商品成本分攤: <span style="font-size:24px;">${costPerItem.toFixed(2)} TWD</span>`;
+            document.getElementById('result').style.display = 'block';
+            
+            // 滾動到結果區域
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // 初始載入時自動計算
+        window.onload = function() {
+            calculate();
+        };
+    </script>
+</body>
+</html>
